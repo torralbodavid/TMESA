@@ -2,6 +2,7 @@
 
 namespace App\Conversations;
 
+use App\TMESA\Horari;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
@@ -10,6 +11,17 @@ use App\Http\Controllers\TMESAInfoController as tmesa;
 
 class TempsRecorregutConversation extends Conversation
 {
+    protected $horari;
+
+    /**
+     * TempsRecorregutConversation constructor.
+     */
+    public function __construct()
+    {
+        $this->horari = new Horari();
+    }
+
+
     /**
      * Pregunta la línia i el sentit que desitja consultar.
      */
@@ -27,7 +39,7 @@ class TempsRecorregutConversation extends Conversation
             }
         }
 
-        $question = Question::create("🚌 Quina línia desitja consultar?")
+        $question = Question::create("🗺 Quina línia desitja consultar?")
             ->fallback('No he pogut consultar cap línia')
             ->callbackId('consulta_linea')
             ->addButtons($linies);
@@ -64,23 +76,52 @@ class TempsRecorregutConversation extends Conversation
     }
 
     private function _paradaDesti($calcul, $linia, $sentit){
+        $this->horari->setParadaOr($calcul);
+        $this->horari->setSentit($sentit);
+
         $origen = array();
 
         $tmesa = new tmesa();
         $infoLinies = $tmesa->retornaDesti($calcul, $linia, $sentit);
 
         foreach ($infoLinies as $key=>$value){
-            array_push($origen, Button::create($value['nom'])->value($value['id']));
+            array_push($origen, Button::create($value['nom'])->value($value['id']."-".$linia."-".$sentit));
         }
 
-        $question = Question::create("🚌 A quina parada vol arribar?")
+        $question = Question::create("🏁 A quina parada vol arribar?")
             ->fallback('No he pogut trobar cap parada')
             ->callbackId('consulta_desti')
             ->addButtons($origen);
 
         return $this->ask($question, function (Answer $answer) {
             if ($answer->isInteractiveMessageReply()) {
-                $this->say("el valor ha estat ".$answer->getValue());
+                $valors = explode("-", $answer->getValue());
+                $this->_jornada($valors[0], $valors[1], $valors[2]);
+            }
+        });
+    }
+
+    private function _jornada($parada, $linia, $sentit){
+        $this->horari->setParadaDe($parada);
+
+        $origen = array();
+
+        $tmesa = new tmesa();
+        $infoLinies = $tmesa->retornaJornada($parada, $linia, $sentit);
+
+        foreach ($infoLinies as $key=>$value){
+            array_push($origen, Button::create($value['nom'])->value($value['id']));
+        }
+
+        $question = Question::create("🗓 Selecciona la jornada")
+            ->fallback('No he pogut trobar cap jornada')
+            ->callbackId('consulta_jornada')
+            ->addButtons($origen);
+
+        return $this->ask($question, function (Answer $answer) {
+            if ($answer->isInteractiveMessageReply()) {
+                $this->horari->setJornada($answer->getValue());
+                $this->say("el valor ha estat ".$this->horari->getParadaDe());
             }
         });
     }

@@ -50,7 +50,7 @@ class TMESAInfoController extends Controller
     }
 
     /*
-     * Agafem l'id i el nom de la parada d'orígen.
+     * Agafem l'id i el nom de la parada de destí.
      */
     /**
      * @return array
@@ -65,6 +65,47 @@ class TMESAInfoController extends Controller
                 'idLinea' => $linia,
                 'idSentido' => $sentit,
                 'proces' => "PassaLinea",
+            ]
+        ]);
+
+        return $this->_calculaParades(utf8_encode($res->getBody()));
+    }
+
+
+    /**
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function retornaJornada($idParada, $linia, $sentit){
+        $client = new Client();
+        $res = $client->request('POST', 'http://www.tmesa.com/consultes.asp', [
+            'form_params' => [
+                'nocache' => (float)rand()/(float)getrandmax(),
+                'idioma' => "ca",
+                'idLinea' => $linia,
+                'idSentit' => $sentit,
+                'parada' => $idParada,
+                'proces' => "obteJornades",
+            ]
+        ]);
+
+        return $this->_calculaParades(utf8_encode($res->getBody()));
+    }
+
+    /**
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function retornaHorari($idJornada, $idParadaDe, $idParadaOr, $idSentido){
+        $client = new Client();
+        $res = $client->request('POST', 'http://www.tmesa.com/consultes.asp', [
+            'form_params' => [
+                'nocache' => (float)rand()/(float)getrandmax(),
+                'idJornada' => $idJornada,
+                'idParadaDe' => $idParadaDe,
+                'idParadaOr' => $idParadaOr,
+                'idSentido' => $idSentido,
+                'proces' => "DemanaHora",
             ]
         ]);
 
