@@ -7,4 +7,5 @@ $botman->hears('/start', function ($bot) {
     $bot->reply('Hola!');
 });
 
-$botman->hears('Start conversation', BotManController::class.'@startConversation');
+$botman->hears('/conversation', BotManController::class.'@startConversation');
+$botman->hears('/linies', 'App\Http\Controllers\TMESAInfoController@mostraTempsRecorregut');
