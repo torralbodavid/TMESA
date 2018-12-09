@@ -140,7 +140,7 @@ class TempsRecorregutConversation extends Conversation
 
         foreach ($horaris as $key=>$value) {
 
-            $resposta .= $horaris[$key]['seguent']."🚏Arriba a l'estació a les: ".$horaris[$key]['anada']. "\n". "⌛️ Temps estimat de viatje: ". $horaris[$key]['minuts']. " minuts. (".$horaris[$key]['tornada'].")\n\n";
+            $resposta .= $horaris[$key]['seguent']."🚏Arriba a l'estació a les ".$horaris[$key]['anada']. "\n". "⌛️ Temps estimat de viatje: ". $horaris[$key]['minuts']. " minuts. (".$horaris[$key]['tornada'].")\n\n";
 
             if($key==40){
                 $this->say($resposta);
