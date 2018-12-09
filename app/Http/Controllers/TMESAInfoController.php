@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Conversations\TempsRecorregutConversation;
 use BotMan\BotMan\BotMan;
+use Carbon\Carbon;
 use Goutte;
 use GuzzleHttp\Client;
 
@@ -109,7 +110,57 @@ class TMESAInfoController extends Controller
             ]
         ]);
 
-        return $this->_calculaParades(utf8_encode($res->getBody()));
+        return $this->_horariAnadaTornada($res->getBody());
+    }
+
+    /**
+     * @param $resposta
+     * @return array
+     *
+     * Aquesta funció retorna un array amb l'hora d'anada, l'hora de tornada i els minuts que tarda en fer el recorregut.
+     *
+     */
+    private function _horariAnadaTornada($resposta){
+
+        $anadesTornades = explode("<", $resposta);
+
+        $anades = explode(">", $anadesTornades[0]);
+        $tornades = explode(">", $anadesTornades[1]);
+
+        $horaris = array();
+
+        $seguentHasSet = 0;
+
+        foreach ($anades as $key=>$horari){
+            if($horari != "si" && $horari != "") {
+
+                $iniciHorari=Carbon::parse($horari);
+                $fiHorari=Carbon::parse($tornades[$key]);
+
+                setlocale(LC_TIME, 'es_ES');
+                $ara = Carbon::now()->timestamp;
+
+                if($iniciHorari->timestamp >= $ara && $seguentHasSet == 0){
+                    $seguent = "➡️";
+                    $seguentHasSet = 1;
+                } else {
+                    $seguent = "";
+                }
+
+                array_push($horaris, array(
+                    'anada' => trim($horari, " "),
+                    'tornada' => trim($tornades[$key], " "),
+                    'minuts' =>  $iniciHorari->diffInMinutes($fiHorari),
+                    'seguent' => $seguent,
+                ));
+            }
+
+            if($seguentHasSet == 0){
+                $horaris[0]["seguent"] = "➡️";
+            }
+        }
+
+        return $horaris;
     }
 
     private function _calculaParades($resposta){

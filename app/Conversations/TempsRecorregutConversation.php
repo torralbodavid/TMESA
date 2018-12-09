@@ -12,6 +12,7 @@ use App\Http\Controllers\TMESAInfoController as tmesa;
 class TempsRecorregutConversation extends Conversation
 {
     protected $horari;
+    protected $tmesa;
 
     /**
      * TempsRecorregutConversation constructor.
@@ -19,6 +20,7 @@ class TempsRecorregutConversation extends Conversation
     public function __construct()
     {
         $this->horari = new Horari();
+        $this->tmesa = new tmesa();
     }
 
 
@@ -29,9 +31,7 @@ class TempsRecorregutConversation extends Conversation
     {
         $linies = array();
 
-        $tmesa = new tmesa();
-
-        $infoLinies = $tmesa->infoLinies();
+        $infoLinies = $this->tmesa->infoLinies();
 
         foreach ($infoLinies as $key=>$value){
             if($value['value'] != 0) {
@@ -45,7 +45,10 @@ class TempsRecorregutConversation extends Conversation
             ->addButtons($linies);
 
         return $this->ask($question, function (Answer $answer) {
+            $this->say($answer->getMessage());
             if ($answer->isInteractiveMessageReply()) {
+                array_search($answer->getValue(), $this->tmesa->infoLinies());
+
                 $valors = explode("-", $answer->getValue());
                 $this->paradaOrigen($valors[0], $valors[1]);
             }
@@ -55,8 +58,7 @@ class TempsRecorregutConversation extends Conversation
     public function paradaOrigen($linia, $sentit){
         $origen = array();
 
-        $tmesa = new tmesa();
-        $infoLinies = $tmesa->retornaOrigen($linia, $sentit);
+        $infoLinies = $this->tmesa->retornaOrigen($linia, $sentit);
 
         foreach ($infoLinies as $key=>$value){
             array_push($origen, Button::create($value['nom'])->value($value['id']."-".$linia."-".$sentit));
@@ -81,8 +83,7 @@ class TempsRecorregutConversation extends Conversation
 
         $origen = array();
 
-        $tmesa = new tmesa();
-        $infoLinies = $tmesa->retornaDesti($calcul, $linia, $sentit);
+        $infoLinies = $this->tmesa->retornaDesti($calcul, $linia, $sentit);
 
         foreach ($infoLinies as $key=>$value){
             array_push($origen, Button::create($value['nom'])->value($value['id']."-".$linia."-".$sentit));
@@ -106,11 +107,14 @@ class TempsRecorregutConversation extends Conversation
 
         $origen = array();
 
-        $tmesa = new tmesa();
-        $infoLinies = $tmesa->retornaJornada($parada, $linia, $sentit);
+        $infoLinies = $this->tmesa->retornaJornada($parada, $linia, $sentit);
 
         foreach ($infoLinies as $key=>$value){
-            array_push($origen, Button::create($value['nom'])->value($value['id']));
+            if($value['nom'] != ""){
+                array_push($origen, Button::create($value['nom'])->value($value['id']));
+            } else {
+                array_push($origen, Button::create("Bus Nit")->value($value['id']));
+            }
         }
 
         $question = Question::create("🗓 Selecciona la jornada")
@@ -121,9 +125,31 @@ class TempsRecorregutConversation extends Conversation
         return $this->ask($question, function (Answer $answer) {
             if ($answer->isInteractiveMessageReply()) {
                 $this->horari->setJornada($answer->getValue());
-                $this->say("el valor ha estat ".$this->horari->getParadaDe());
+                $this->_horari();
             }
         });
+    }
+
+    private function _horari(){
+
+        $this->say("Estem carregant els horaris. Veurà marcat amb un ➡️ l'horari del següent bus.");
+
+        $horaris = $this->tmesa->retornaHorari($this->horari->getJornada(), $this->horari->getParadaDe(), $this->horari->getParadaOr(), $this->horari->getSentit());
+
+        $resposta = "";
+
+        foreach ($horaris as $key=>$value) {
+
+            $resposta .= $horaris[$key]['seguent']."🚏Arriba a l'estació a les: ".$horaris[$key]['anada']. "\n". "⌛️ Temps estimat de viatje: ". $horaris[$key]['minuts']. " minuts. (".$horaris[$key]['tornada'].")\n\n";
+
+            if($key==40){
+                $this->say($resposta);
+                $resposta = "";
+            };
+        }
+
+        return $this->say($resposta);
+
     }
 
     /**
@@ -131,6 +157,7 @@ class TempsRecorregutConversation extends Conversation
      */
     public function run()
     {
+        $this->say("👋 Benvinguda! A continuació podrà saber el temps que tardarà el seu bus en arribar i quan tardarà en arribar a la seva destinació.");
         $this->consultaLinia();
     }
 }
