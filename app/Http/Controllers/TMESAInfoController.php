@@ -11,6 +11,8 @@ use GuzzleHttp\Client;
 class TMESAInfoController extends Controller
 {
 
+
+
     /*
      * Agafem el nom, el títol i l'id de la línia i el sentit.
      */
@@ -134,11 +136,11 @@ class TMESAInfoController extends Controller
         foreach ($anades as $key=>$horari){
             if($horari != "si" && $horari != "") {
 
-                $iniciHorari=Carbon::parse($horari);
-                $fiHorari=Carbon::parse($tornades[$key]);
-
                 setlocale(LC_TIME, 'es_ES');
                 $ara = Carbon::now()->timestamp;
+
+                $iniciHorari=Carbon::parse($horari);
+                $fiHorari=Carbon::parse($tornades[$key]);
 
                 if($iniciHorari->timestamp >= $ara && $seguentHasSet == 0){
                     $seguent = "➡️";
@@ -147,20 +149,67 @@ class TMESAInfoController extends Controller
                     $seguent = "";
                 }
 
+
                 array_push($horaris, array(
                     'anada' => trim($horari, " "),
                     'tornada' => trim($tornades[$key], " "),
                     'minuts' =>  $iniciHorari->diffInMinutes($fiHorari),
                     'seguent' => $seguent,
+                    'temps' => gmdate("H:i:s", Carbon::now()->diffInSeconds($iniciHorari->addDays(1)))
                 ));
             }
 
-            if($seguentHasSet == 0){
-                $horaris[0]["seguent"] = "➡️";
+        }
+
+        if($seguentHasSet == 0){
+            $horaris[0]["seguent"] = "➡️";
+        }
+
+        return $this->_sortHorari($horaris);
+    }
+
+
+    /**
+     * @param $horaris
+     * @return array
+     *
+     * Aquesta funció retornarà sempre el primer bus.
+     *
+     */
+    private function _sortHorari($horaris){
+
+        $comenca_index = array_column($horaris, 'seguent');
+        $comenca = array_search("➡️", $comenca_index);
+
+        $sortejat = array();
+
+        foreach (array_slice($horaris, $comenca) as $key => $val)
+        {
+            array_push($sortejat, array(
+                'anada' => $val['anada'],
+                'tornada' => $val['tornada'],
+                'minuts' =>  $val['minuts'],
+                'seguent' => $val['seguent'],
+                'temps' => $val['temps'],
+            ));
+        }
+
+        foreach ($horaris as $key => $val)
+        {
+            if($key < $comenca) {
+                array_push($sortejat, array(
+                    'anada' => $val['anada'],
+                    'tornada' => $val['tornada'],
+                    'minuts' => $val['minuts'],
+                    'seguent' => $val['seguent'],
+                    'temps' => $val['temps'],
+                ));
+            } else {
+                break;
             }
         }
 
-        return $horaris;
+        return $sortejat;
     }
 
     private function _calculaParades($resposta){

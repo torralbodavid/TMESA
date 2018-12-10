@@ -45,12 +45,13 @@ class TempsRecorregutConversation extends Conversation
             ->addButtons($linies);
 
         return $this->ask($question, function (Answer $answer) {
-            $this->say($answer->getMessage());
             if ($answer->isInteractiveMessageReply()) {
                 array_search($answer->getValue(), $this->tmesa->infoLinies());
 
                 $valors = explode("-", $answer->getValue());
                 $this->paradaOrigen($valors[0], $valors[1]);
+            } else {
+                $this->consultaLinia();
             }
         });
     }
@@ -140,7 +141,7 @@ class TempsRecorregutConversation extends Conversation
 
         foreach ($horaris as $key=>$value) {
 
-            $resposta .= $horaris[$key]['seguent']."🚏Arriba a l'estació a les ".$horaris[$key]['anada']. "\n". "⌛️ Temps estimat de viatje: ". $horaris[$key]['minuts']. " minuts. (".$horaris[$key]['tornada'].")\n\n";
+            $resposta .= $horaris[$key]['seguent']." ".$horaris[$key]['temps']."🚏Arriba a l'estació a les ".$horaris[$key]['anada']. "\n". "⌛️ Temps estimat de viatje: ". $horaris[$key]['minuts']. " minuts. (".$horaris[$key]['tornada'].")\n\n";
 
             if($key==40){
                 $this->say($resposta);
