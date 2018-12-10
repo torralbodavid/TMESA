@@ -50,14 +50,15 @@ class TempsRecorregutConversation extends Conversation
 
                 $valors = explode("-", $answer->getValue());
                 $this->paradaOrigen($valors[0], $valors[1]);
-            } else {
-                $this->consultaLinia();
             }
+
         });
     }
 
     public function paradaOrigen($linia, $sentit){
         $origen = array();
+        $this->horari->setLinia($linia);
+        $this->horari->setSentit($sentit);
 
         $infoLinies = $this->tmesa->retornaOrigen($linia, $sentit);
 
@@ -71,6 +72,7 @@ class TempsRecorregutConversation extends Conversation
             ->addButtons($origen);
 
         return $this->ask($question, function (Answer $answer) {
+
             if ($answer->isInteractiveMessageReply()) {
                 $valors = explode("-", $answer->getValue());
                 $this->_paradaDesti($valors[0], $valors[1], $valors[2]);
@@ -80,7 +82,6 @@ class TempsRecorregutConversation extends Conversation
 
     private function _paradaDesti($calcul, $linia, $sentit){
         $this->horari->setParadaOr($calcul);
-        $this->horari->setSentit($sentit);
 
         $origen = array();
 

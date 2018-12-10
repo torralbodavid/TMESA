@@ -16,6 +16,23 @@ class Horari
     private $paradaDe;
     private $paradaOr;
     private $sentit;
+    private $linia;
+
+    /**
+     * @return mixed
+     */
+    public function getLinia()
+    {
+        return $this->linia;
+    }
+
+    /**
+     * @param mixed $linia
+     */
+    public function setLinia($linia): void
+    {
+        $this->linia = $linia;
+    }
 
     /**
      * @return mixed
