@@ -210,7 +210,7 @@ class TempsRecorregutConversation extends Conversation
 
                 try {
                     if($answer->getValue() == 0){
-                        $this->say("Gràcies per utilitzar-me!");
+                        $this->say("Fins la propera!");
                     } else {
                         $this->_horari($answer->getValue());
                     }
