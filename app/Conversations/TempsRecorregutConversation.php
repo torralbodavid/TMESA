@@ -161,7 +161,7 @@ class TempsRecorregutConversation extends Conversation
                 $this->horari->setJornada($answer->getValue());
 
                 try {
-                    $this->_horari();
+                    $this->_horari(1);
                 } catch (\Exception $e){
                     $this->say("⚠️ No hem pogut carregar els horaris. Si us plau, torni-ho a intentar escrivint /linies");
                 }
@@ -169,28 +169,57 @@ class TempsRecorregutConversation extends Conversation
         });
     }
 
-    private function _horari(){
+    private function _horari($voltaHorari){
 
         $this->say("Estem carregant els horaris. Veurà marcat amb un ➡️ l'horari del següent bus.");
 
         $horaris = $this->tmesa->retornaHorari($this->horari->getJornada(), $this->horari->getParadaDe(), $this->horari->getParadaOr(), $this->horari->getSentit());
 
-        $resposta = "";
+        $totsHoraris = "";
 
         foreach ($horaris as $key=>$value) {
 
             $hora = explode(":", $horaris[$key]['temps'])[0];
             $minut = explode(":", $horaris[$key]['temps'])[1];
 
-            $resposta .= $horaris[$key]['seguent']." ".$horaris[$key]['temps']."🚏Arriba a l'estació a les ".$horaris[$key]['anada']. "\n". "⌛️ Temps estimat de viatje: ". $horaris[$key]['minuts']. " minuts. (".$horaris[$key]['tornada'].")\n\n";
+            $totsHoraris .= "🚏El bus arribarà a la teva estació en ".$hora." hores i ".$minut." minuts (A les ".$horaris[$key]['anada'].")\n". "⌛️ Temps estimat de viatje: ". $horaris[$key]['minuts']. " minuts. (Arribarà al teu destí a les ".$horaris[$key]['tornada'].")\n\n";
 
-            if($key==40){
-                $this->say($resposta);
-                $resposta = "";
-            };
         }
 
-        return $this->say($resposta);
+        $algunsHoraris = explode("🚏", $totsHoraris);
+
+        for ($i = $voltaHorari; $i <= ($voltaHorari+2); $i++) {
+            try {
+                $this->say("🚏" . $algunsHoraris[$i]);
+            } catch (\Exception $exception){
+                $this->say("No hi ha més horaris disponibles.");
+                exit;
+            }
+        }
+
+        $question = Question::create("📜 Vols veure més resultats?")
+            ->fallback('No hi ha més resultats')
+            ->callbackId('consulta_resultats')
+            ->addButtons([
+                Button::create("✅ Si")->value(($voltaHorari+1)+2),
+                Button::create("❌ No")->value(0)
+            ]);
+
+        return $this->ask($question, function (Answer $answer) {
+            if ($answer->isInteractiveMessageReply()) {
+
+                try {
+                    if($answer->getValue() == 0){
+                        $this->say("Gràcies per utilitzar-me!");
+                    } else {
+                        $this->_horari($answer->getValue());
+                    }
+
+                } catch (\Exception $e){
+                    $this->say("⚠️ No hem pogut carregar els resultats. Si us plau, torni-ho a intentar escrivint /linies");
+                }
+            }
+        });;
 
     }
 
