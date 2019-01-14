@@ -182,8 +182,11 @@ class TempsRecorregutConversation extends Conversation
             $hora = explode(":", $horaris[$key]['temps'])[0];
             $minut = explode(":", $horaris[$key]['temps'])[1];
 
-            $totsHoraris .= "🚏El bus arribarà a la teva estació en ".$hora." hores i ".$minut." minuts (A les ".$horaris[$key]['anada'].")\n". "⌛️ Temps estimat de viatje: ". $horaris[$key]['minuts']. " minuts. (Arribarà al teu destí a les ".$horaris[$key]['tornada'].")\n\n";
-
+            if($hora == 00) {
+                $totsHoraris .= "🚏El bus arribarà a la teva estació en " . $minut . " minuts (A les " . $horaris[$key]['anada'] . ")\n" . "⌛️ Temps estimat de viatje: " . $horaris[$key]['minuts'] . " minuts. (Arribarà al teu destí a les " . $horaris[$key]['tornada'] . ")\n\n";
+            } else {
+                $totsHoraris .= "🚏El bus arribarà a la teva estació en " . $hora . " hores i " . $minut . " minuts (A les " . $horaris[$key]['anada'] . ")\n" . "⌛️ Temps estimat de viatje: " . $horaris[$key]['minuts'] . " minuts. (Arribarà al teu destí a les " . $horaris[$key]['tornada'] . ")\n\n";
+            }
         }
 
         $algunsHoraris = explode("🚏", $totsHoraris);
@@ -228,7 +231,7 @@ class TempsRecorregutConversation extends Conversation
      */
     public function run()
     {
-        $this->say("👋 Benvinguda! A continuació podrà saber el temps que tardarà el seu bus en arribar i quan tardarà en arribar a la seva destinació.");
+        $this->say("👋 Benvinguda! A continuació podràs saber el temps que tardarà el teu bus en arribar i quan tardarà en arribar a la teva destinació.");
         $this->consultaLinia();
     }
 }
