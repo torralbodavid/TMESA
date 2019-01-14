@@ -1,11 +1,19 @@
 {
-    "name": "botman/studio",
-    "description": "BotMan Chatbot framework.",
+    "name": "torralbodavid/tmesa",
+    "description": "Bot que et mostra els horaris de les línies d'autobusos de Terrassa.",
+    "version": "1.0.0",
     "keywords": [
-        "botman",
-        "chatbot",
-        "framework",
-        "laravel"
+        "tmesa",
+        "bus",
+        "terrassa",
+        "botman"
+    ],
+    "authors": [
+        {
+            "name": "David Torralbo",
+            "email": "davidtorralboperez@gmail.com",
+            "role": "Developer"
+        }
     ],
     "license": "MIT",
     "type": "project",
