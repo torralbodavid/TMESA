@@ -1,7 +1,7 @@
 {
     "name": "torralbodavid/tmesa",
     "description": "Bot que et mostra els horaris de les línies d'autobusos de Terrassa.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "keywords": [
         "tmesa",
         "bus",
