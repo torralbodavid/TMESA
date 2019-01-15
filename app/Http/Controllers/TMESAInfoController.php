@@ -134,7 +134,7 @@ class TMESAInfoController extends Controller
         $seguentHasSet = 0;
 
         foreach ($anades as $key=>$horari){
-            if($horari != "si" && $horari != "") {
+            if($horari != "si" && $horari != "" && $horari != "no") {
 
                 setlocale(LC_TIME, 'es_ES');
                 $ara = Carbon::now()->timestamp;
@@ -151,6 +151,7 @@ class TMESAInfoController extends Controller
 
 
                 array_push($horaris, array(
+                    'mostrar' => $anades[$key+1],
                     'anada' => trim($horari, " "),
                     'tornada' => trim($tornades[$key], " "),
                     'minuts' =>  $iniciHorari->diffInMinutes($fiHorari),
@@ -185,25 +186,31 @@ class TMESAInfoController extends Controller
 
         foreach (array_slice($horaris, $comenca) as $key => $val)
         {
-            array_push($sortejat, array(
-                'anada' => $val['anada'],
-                'tornada' => $val['tornada'],
-                'minuts' =>  $val['minuts'],
-                'seguent' => $val['seguent'],
-                'temps' => $val['temps'],
-            ));
-        }
-
-        foreach ($horaris as $key => $val)
-        {
-            if($key < $comenca) {
+            if($val['mostrar'] == "si") {
                 array_push($sortejat, array(
+                    'mostrar' => $val['mostrar'],
                     'anada' => $val['anada'],
                     'tornada' => $val['tornada'],
                     'minuts' => $val['minuts'],
                     'seguent' => $val['seguent'],
                     'temps' => $val['temps'],
                 ));
+            }
+        }
+
+        foreach ($horaris as $key => $val)
+        {
+            if($key < $comenca) {
+                if($val['mostrar'] == "si") {
+                    array_push($sortejat, array(
+                        'mostrar' => $val['mostrar'],
+                        'anada' => $val['anada'],
+                        'tornada' => $val['tornada'],
+                        'minuts' => $val['minuts'],
+                        'seguent' => $val['seguent'],
+                        'temps' => $val['temps'],
+                    ));
+                }
             } else {
                 break;
             }
