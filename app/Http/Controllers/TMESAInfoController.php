@@ -14,7 +14,7 @@ class TMESAInfoController extends Controller
 
 
     /*
-     * Agafem el nom, el títol i l'id de la línia i el sentit.
+     * Get name, title, id of the line and bus direction.
      */
     public function infoLinies(){
 
@@ -32,7 +32,7 @@ class TMESAInfoController extends Controller
     }
 
     /*
-     * Agafem l'id i el nom de la parada d'orígen.
+     * Get id and name of the origin bus stop
      */
     /**
      * @return array
@@ -53,7 +53,7 @@ class TMESAInfoController extends Controller
     }
 
     /*
-     * Agafem l'id i el nom de la parada de destí.
+     * Get id and name of the destination bus stop
      */
     /**
      * @return array
@@ -119,7 +119,7 @@ class TMESAInfoController extends Controller
      * @param $resposta
      * @return array
      *
-     * Aquesta funció retorna un array amb l'hora d'anada, l'hora de tornada i els minuts que tarda en fer el recorregut.
+     * This function returns an array with the check in time, the check out time and the minuts we will take in the bus.
      *
      */
     private function _horariAnadaTornada($resposta){
@@ -174,7 +174,7 @@ class TMESAInfoController extends Controller
      * @param $horaris
      * @return array
      *
-     * Aquesta funció retornarà sempre el primer bus.
+     * This function returns always the first bus.
      *
      */
     private function _sortHorari($horaris){
